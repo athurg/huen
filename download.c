@@ -1,30 +1,30 @@
-#include <fetch.h>
+#include <curl/curl.h>
 
-int fetch(const char *url, char *buff)
+
+int fetch(const char *url, char *savename, curl_progress_callback cb, void *user_data)
 {
-	fetchIO * fp;
-	char flags[10]={0};
-	size_t size;
-	char tmp[1024];
-	size_t ret=0;
-	struct url_stat stat={0};
+	int ret;
+	CURL *curl;
+	FILE *fp;
 
-	ret = fetchStatURL(url, &stat, flags);
-	printf("todo %d %d\n", ret, stat.size);
-	ret=0;
+	fp = fopen(savename, "w");
+	curl = curl_easy_init();
+	curl_easy_setopt(curl,CURLOPT_URL,url);
+	curl_easy_setopt(curl,CURLOPT_WRITEDATA,fp);
+	//自动跟踪和跟随URL
+	curl_easy_setopt(curl,CURLOPT_FOLLOWLOCATION, 1);
 
-	fp = fetchGetURL(url, flags);
-	if (!fp) {
-		printf("error: ");
-		return 1;
+	//下载进度跟踪函数配置
+	if (cb!=NULL) {
+		curl_easy_setopt(curl,CURLOPT_NOPROGRESS, 0);
+		curl_easy_setopt(curl,CURLOPT_PROGRESSFUNCTION, cb);
+		curl_easy_setopt(curl,CURLOPT_PROGRESSDATA, user_data);
 	}
 
-	do{
-		size = fetchIO_read(fp, tmp, sizeof(tmp));
-		ret +=size;
-	}while(size);
+	ret = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
 
-	fetchIO_close(fp);
+	fclose(fp);
 
 	printf("result %d\n", ret);
 

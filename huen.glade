@@ -4,16 +4,21 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkTreeStore" id="treestore">
     <columns>
+      <!-- column-name status -->
+      <column type="guint"/>
       <!-- column-name name -->
       <column type="gchararray"/>
       <!-- column-name url -->
       <column type="gchararray"/>
-      <!-- column-name length -->
-      <column type="gint64"/>
+      <!-- column-name size -->
+      <column type="guint64"/>
+      <!-- column-name progress -->
+      <column type="gdouble"/>
     </columns>
   </object>
   <object class="GtkWindow" id="main_window">
     <property name="visible">True</property>
+    <property name="title" translatable="yes">&#x72D0;&#x5F71;</property>
     <signal name="destroy" handler="gtk_main_quit"/>
     <child>
       <object class="GtkVBox" id="vbox1">
@@ -34,28 +39,44 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="model">treestore</property>
+            <property name="level_indentation">4</property>
             <property name="enable_grid_lines">both</property>
             <property name="enable_tree_lines">True</property>
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn1">
-                <property name="title">&#x89C6;&#x9891;&#x540D;&#x79F0;</property>
+                <property name="sort_column_id">4</property>
                 <child>
-                  <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertext1">
+                    <signal name="toggled" handler="toggle_status_cb"/>
+                  </object>
                   <attributes>
-                    <attribute name="text">0</attribute>
+                    <attribute name="active">0</attribute>
                   </attributes>
                 </child>
               </object>
             </child>
             <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn2">
-                <property name="title">&#x4E0B;&#x8F7D;&#x5730;&#x5740;</property>
-                <property name="expand">True</property>
-                <property name="alignment">0.5</property>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn5">
+                <property name="title">&#x540D;&#x79F0;</property>
+                <property name="clickable">True</property>
+                <property name="reorderable">True</property>
                 <child>
-                  <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                  <object class="GtkCellRendererText" id="cellrenderertoggle1"/>
                   <attributes>
                     <attribute name="text">1</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn4">
+                <property name="sizing">autosize</property>
+                <property name="title">&#x4E0B;&#x8F7D;&#x8FDB;&#x5EA6;</property>
+                <property name="expand">True</property>
+                <child>
+                  <object class="GtkCellRendererProgress" id="cellrendererspin1"/>
+                  <attributes>
+                    <attribute name="value">4</attribute>
                   </attributes>
                 </child>
               </object>
@@ -64,9 +85,9 @@
               <object class="GtkTreeViewColumn" id="treeviewcolumn3">
                 <property name="title">&#x6587;&#x4EF6;&#x5927;&#x5C0F;</property>
                 <child>
-                  <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                  <object class="GtkCellRendererText" id="cellrenderertext2"/>
                   <attributes>
-                    <attribute name="text">2</attribute>
+                    <attribute name="text">3</attribute>
                   </attributes>
                 </child>
               </object>
@@ -77,9 +98,29 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="label2">
+          <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">&#x72D0;&#x5F71;</property>
+            <child>
+              <object class="GtkProgressBar" id="progressbar1">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label" translatable="yes">&#x5F00;&#x59CB;&#x4E0B;&#x8F7D;</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="download_cb"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
