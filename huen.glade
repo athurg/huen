@@ -5,7 +5,7 @@
   <object class="GtkTreeStore" id="treestore">
     <columns>
       <!-- column-name status -->
-      <column type="guint"/>
+      <column type="gint"/>
       <!-- column-name name -->
       <column type="gchararray"/>
       <!-- column-name url -->
@@ -13,21 +13,23 @@
       <!-- column-name size -->
       <column type="guint64"/>
       <!-- column-name progress -->
-      <column type="gdouble"/>
+      <column type="gint"/>
     </columns>
   </object>
-  <object class="GtkWindow" id="main_window">
+  <object class="GtkWindow" id="window">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">&#x72D0;&#x5F71;</property>
     <signal name="destroy" handler="gtk_main_quit"/>
     <child>
       <object class="GtkVBox" id="vbox1">
+        <property name="height_request">500</property>
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkLabel" id="label1">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">&#x72D0;&#x5F71;</property>
+            <property name="xalign">0</property>
+            <property name="xpad">10</property>
+            <property name="label" translatable="yes">&#x8BF7;&#x8F93;&#x5165;&#x64AD;&#x653E;&#x9875;&#x9762;&#x5730;&#x5740;&#xFF1A;</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -35,19 +37,87 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTreeView" id="treeview1">
+          <object class="GtkHBox" id="hbox2">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkEntry" id="url_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">&#x25CF;</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFileChooserButton" id="filechooserbutton">
+                <property name="visible">True</property>
+                <property name="action">select-folder</property>
+                <property name="title" translatable="yes">&#x9009;&#x62E9;&#x4FDD;&#x5B58;&#x8DEF;&#x5F84;</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label" translatable="yes">&#x6DFB;&#x52A0;</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="btn_add_cb"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button3">
+                <property name="label" translatable="yes">&#x79FB;&#x9664;</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="btn_remove_cb"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_download">
+                <property name="label" translatable="yes">&#x4E0B;&#x8F7D;</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="download_cb"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTreeView" id="treeview">
+            <property name="height_request">500</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="model">treestore</property>
-            <property name="level_indentation">4</property>
             <property name="enable_grid_lines">both</property>
             <property name="enable_tree_lines">True</property>
             <child>
               <object class="GtkTreeViewColumn" id="treeviewcolumn1">
-                <property name="sort_column_id">4</property>
+                <property name="title">&#x9009;&#x62E9;</property>
                 <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertext1">
-                    <signal name="toggled" handler="toggle_status_cb"/>
+                  <object class="GtkCellRendererToggle" id="cellrenderertoggle1">
+                    <signal name="toggled" handler="status_toggle_cb"/>
                   </object>
                   <attributes>
                     <attribute name="active">0</attribute>
@@ -56,12 +126,10 @@
               </object>
             </child>
             <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn5">
-                <property name="title">&#x540D;&#x79F0;</property>
-                <property name="clickable">True</property>
-                <property name="reorderable">True</property>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn2">
+                <property name="title">&#x6807;&#x9898;</property>
                 <child>
-                  <object class="GtkCellRendererText" id="cellrenderertoggle1"/>
+                  <object class="GtkCellRendererText" id="cellrenderertext1"/>
                   <attributes>
                     <attribute name="text">1</attribute>
                   </attributes>
@@ -69,12 +137,11 @@
               </object>
             </child>
             <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn4">
-                <property name="sizing">autosize</property>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn3">
                 <property name="title">&#x4E0B;&#x8F7D;&#x8FDB;&#x5EA6;</property>
                 <property name="expand">True</property>
                 <child>
-                  <object class="GtkCellRendererProgress" id="cellrendererspin1"/>
+                  <object class="GtkCellRendererProgress" id="cellrendererprogress1"/>
                   <attributes>
                     <attribute name="value">4</attribute>
                   </attributes>
@@ -82,8 +149,8 @@
               </object>
             </child>
             <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn3">
-                <property name="title">&#x6587;&#x4EF6;&#x5927;&#x5C0F;</property>
+              <object class="GtkTreeViewColumn" id="treeviewcolumn4">
+                <property name="title">&#x5927;&#x5C0F;</property>
                 <child>
                   <object class="GtkCellRendererText" id="cellrenderertext2"/>
                   <attributes>
@@ -94,37 +161,41 @@
             </child>
           </object>
           <packing>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
-        <child>
-          <object class="GtkHBox" id="hbox1">
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="msg_dlg">
+    <property name="border_width">5</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="buttons">ok</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox1">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area1">
             <property name="visible">True</property>
+            <property name="can_default">True</property>
+            <property name="has_default">True</property>
+            <property name="receives_default">True</property>
+            <property name="extension_events">all</property>
+            <property name="layout_style">end</property>
             <child>
-              <object class="GtkProgressBar" id="progressbar1">
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="position">0</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
-              <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">&#x5F00;&#x59CB;&#x4E0B;&#x8F7D;</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="download_cb"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="position">1</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">2</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </object>

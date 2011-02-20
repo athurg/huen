@@ -1,3 +1,13 @@
-		huen
+		狐影（huen）
+Version:
+	0.0.1
+Desc:
+		狐影是一种用于下载搜狐影音频道视频的工具。
+	你只需要输入对应播放页面的地址，狐影即可自动下载并合并视频片段
 
-huen is a download tools for downloading movies and merge into a signle file from http://tv.sohu.com
+TODO:
+	1、下载完成后自动合并的功能；
+	2、增加取消下载和多线程下载的功能；
+	3、更改界面，用于显示视频更多的信息；
+	4、增加自动添加连续剧后续集的功能；
+	5、增加搜索功能，用输入视频名取代现在的输入视频播放地址的功能；

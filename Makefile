@@ -5,7 +5,7 @@ LDFLAGS=-lcurl -export-dynamic
 LDFLAGS+=`pkg-config json-glib-1.0 --libs`
 LDFLAGS+=`pkg-config gtk+-2.0 --libs`
 
-OBJS=huen.o download.o parse.o
+OBJS=huen.o download.o parse.o callback.o
 
 all:huen
 
