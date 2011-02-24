@@ -7,22 +7,29 @@
  * 	下载函数
  *
  * 说明:
- * 	自动下载url到filename中。返回libcurl下载的状态（0为成功下载）
+ * 	自动下载url到filename中。返回libcurl下载的状态
+ * 	如果filename为NULL，则自动生成一个随机文件名
+ * 	下载成功返回filename，否则返回NULL
  * 	如果cb非NULL，下载过程中会每秒以已下载/总大小、已上传/总大小和user_data为参数调用该函数。
  * 	回调函数声明如下：（具体参考curl手册）
  * 		typedef int (*curl_progress_callback)(void *user_data, double dltotal, double dlnow, double ultotal, double ulnow);
  */
-int fetch(const char *url, char *filename, curl_progress_callback cb, void *user_data)
+char * fetch(const char *url, curl_progress_callback cb, void *user_data)
 {
-	int ret;
-	CURL *curl;
+	int fd, ret;
 	FILE *fp;
+	CURL *curl;
+	char tmpname[]="/tmp/huen_download.XXXXXX";
 
-	if (url==NULL){
-		return -1;
-	}
+	if (url==NULL)
+		return NULL;
 
-	fp = fopen(filename, "w");
+	ret = mkstemp(tmpname);
+	if (ret<0)
+		return NULL;
+	close(ret);//we open it manually!
+
+	fp = fopen(tmpname, "w");
 	curl = curl_easy_init();
 	curl_easy_setopt(curl,CURLOPT_URL,url);
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA,fp);
@@ -45,7 +52,7 @@ int fetch(const char *url, char *filename, curl_progress_callback cb, void *user
 	fclose(fp);
 	curl_easy_cleanup(curl);
 
-	return ret;
+	return ret ? NULL : strdup(tmpname);
 }
 
 /*
@@ -58,16 +65,16 @@ int fetch(const char *url, char *filename, curl_progress_callback cb, void *user
 const char * get_download_url(const char *url)
 {
 	FILE *fp;
-	char *pos;
+	char *pos, *filename;
 	char buf[1024]={0};
 	unsigned int vid=0,inscript=0;
-	char tmpname[]="/tmp/huen_tmpXXXXXX";
 
-	mkstemp(tmpname);
-	if (fetch(url, tmpname, NULL, NULL))
+	filename = fetch(url, NULL, NULL);
+	if (filename==NULL) {
 		return NULL;
+	}
 
-	fp = fopen(tmpname, "r");
+	fp = fopen(filename, "r");
 	while(fgets(buf, sizeof(buf)-1, fp)){
 		if (strstr(buf, "<script"))	inscript=1;
 
@@ -81,7 +88,7 @@ const char * get_download_url(const char *url)
 		if (strstr(buf, "</script>"))	inscript=0;
 	}
 	fclose(fp);
-	unlink(tmpname);
+	unlink(filename);
 
 	if (!vid)
 		return NULL;
@@ -90,3 +97,41 @@ const char * get_download_url(const char *url)
 }
 
 
+/*
+ *	获取影片列表
+ *
+ * 传入影片关键字
+ *
+ * 输出搜索到的影片信息URL地址单链表
+ *
+ */
+#define URL_KEYSTR	"<a class=\"name\" href=\"/to?u="
+GSList * get_movie_list(const char *keyword)
+{
+	FILE *fp;
+	char buf[1024]={0};
+	char *url,*pos, *filename=NULL;
+	GSList *lst=NULL;
+
+	//FIXME:
+	//	将keyword编码成%xx%xx%xx的形式
+	url = g_strdup_printf("http://so.tv.sohu.com/mts?wd=%s", keyword);
+	filename = fetch(url, NULL, NULL);
+	if (!filename) {
+		return NULL;
+	}
+
+	fp = fopen(filename, "r");
+	while(fgets(buf, sizeof(buf)-1, fp)){
+		url = strstr(buf, URL_KEYSTR);
+		if (url){
+			url += strlen(URL_KEYSTR);
+			pos  = strchr(url,'&');
+			*pos ='\0';
+			lst = g_slist_append(lst, strdup(url));
+		}
+	}
+	fclose(fp);
+	unlink(filename);
+	return lst;
+}

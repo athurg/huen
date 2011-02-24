@@ -92,14 +92,17 @@ gpointer do_download(gpointer update_cb)
 
 		blocks = gtk_tree_model_iter_n_children(model, &iter);
 		for (unsigned int i=0; i<blocks; i++) {
-			char *save_name;
+			const char *filename;
 			gtk_tree_model_iter_nth_child(model, &child_iter, &iter, i);
 
 			gtk_tree_model_get(model, &child_iter, 1,&name,-1);
 			gtk_tree_model_get(model, &child_iter, 2,&url,-1);
 
-			save_name = g_strdup_printf("%s/%s", (char *)path, name);
-			fetch(url, save_name, (curl_progress_callback)update_cb, &child_iter);
+
+			filename = fetch(url, (curl_progress_callback)update_cb, &child_iter);
+			if (filename) {
+				rename(filename,g_strdup_printf("%s/%s", (char *)path, name));
+			}
 
 			gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
 					4, (unsigned int)((i+1)*100/blocks),
@@ -134,25 +137,45 @@ void download_cb(GtkButton *self, gpointer data)
  * 	用于获取指定播放页面视频的片段下载地址，并自动添加到treestore中。
  *
  */
-void btn_add_cb(void)
+void update_list_cb(gpointer url, gpointer user_data)
+{
+	const char *filename;
+	const char *json_url;
+
+	json_url = get_download_url((char *)url);
+	filename = fetch(json_url, NULL, NULL);
+	if (!filename) {
+		SHOW_MESSAGE("获取信息失败\n影片地址：%s", url);
+	} else {
+		parse(filename);
+	}
+	unlink(filename);
+}
+
+/*
+ * 	【搜索按钮】回调函数
+ *
+ * 说明:
+ * 	用于获取指定播放页面视频的片段下载地址，并自动添加到treestore中。
+ *
+ */
+void btn_search_cb(void)
 {
 	GtkEntry *entry;
 	const char *url;
-	char tmpname[]="/tmp/huen_tmpXXXXXX";
-	GtkTreeIter iter;
+	GSList *list;
 
 	entry = GTK_ENTRY(gtk_builder_get_object(builder,"url_entry"));
 
-	mkstemp(tmpname);
-	url = get_download_url(gtk_entry_get_text(entry));
-
-	if (fetch(url, tmpname, NULL, NULL))
-		SHOW_MESSAGE("获取信息失败\n影片地址：%s", url);
-	else {
-		parse(tmpname);
+	list = get_movie_list(gtk_entry_get_text(entry));
+	if (!list){
+		SHOW_MESSAGE("没有找到影片！");
+	} else {
+		g_slist_foreach(list, update_list_cb, NULL);
 	}
-	unlink(tmpname);
+	g_slist_free(list);
 }
+
 
 /*
  * 	【移除按钮】回调函数
