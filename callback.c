@@ -45,11 +45,14 @@ void status_toggle_cb(GtkCellRendererToggle *cell_rdr, gchar *path, gpointer use
 
 /**
  *	进度条更新回调函数
+ *
+ * TODO:
+ * 	更新！
  */
 int update_progress_bar_cb(void *iter, double dt, double dn, double ut, double un)
 {
 	unsigned int val;
-
+#if 0
 	gdk_threads_enter();
 
 	val =dn*100/dt;
@@ -59,7 +62,7 @@ int update_progress_bar_cb(void *iter, double dt, double dn, double ut, double u
 	gtk_tree_store_set(GTK_TREE_STORE(model), (GtkTreeIter *)iter, 4,val, -1);
 
 	gdk_threads_leave();
-
+#endif
 	return 0;
 }
 /*
@@ -78,11 +81,11 @@ gpointer do_download(gpointer update_cb)
 	unsigned int pnum, cnum;//number of parrent and child
 	GtkTreeIter iter,child_iter;
 	GtkFileChooserButton * path_btn;
+	GSList *urls;
 
 
 	path_btn = GTK_FILE_CHOOSER_BUTTON(gtk_builder_get_object(builder,"filechooserbutton"));
 	path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(path_btn));
-
 
 	gtk_tree_model_get_iter_first(model, &iter);
 	do{
@@ -90,23 +93,21 @@ gpointer do_download(gpointer update_cb)
 		gtk_tree_model_get(model, &iter, 0,&status,-1);
 		if (!status)	continue;
 
-		blocks = gtk_tree_model_iter_n_children(model, &iter);
+		gtk_tree_model_get(model, &iter, 1,&name, -1);
+		gtk_tree_model_get(model, &iter, 2,&urls, -1);
+		blocks = g_slist_length(urls);
 		for (unsigned int i=0; i<blocks; i++) {
-			const char *filename;
-			gtk_tree_model_iter_nth_child(model, &child_iter, &iter, i);
-
-			gtk_tree_model_get(model, &child_iter, 1,&name,-1);
-			gtk_tree_model_get(model, &child_iter, 2,&url,-1);
-
-
-			filename = fetch(url, (curl_progress_callback)update_cb, &child_iter);
-			if (filename) {
-				rename(filename,g_strdup_printf("%s/%s", (char *)path, name));
+			const char *tmpname=NULL, *savename;
+			url = (char *)g_slist_nth_data(urls, i);
+			tmpname = fetch(url, (curl_progress_callback)update_cb, NULL);
+			/*
+			 * FIXME
+			 * 	这里加入自定义路径，则rename总是返回-1，求真相
+			 */
+			savename = g_strdup_printf("/tmp/%s-%dof%d.mp4", name, i, blocks);
+			if (tmpname) {
+				rename(tmpname,savename);
 			}
-
-			gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
-					4, (unsigned int)((i+1)*100/blocks),
-					-1);
 		}
 	}while(gtk_tree_model_iter_next(model, &iter));
 }

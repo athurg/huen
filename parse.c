@@ -14,12 +14,12 @@ int parse(const char *filename)
 {
 	JsonParser *parser;
 	JsonObject *json_obj;
-	JsonArray *urls, *lengths;
+	JsonArray *urlarray;
 	unsigned int blocks;
-	GtkTreeIter piter,citer;
-	GtkTreeStore *store=GTK_TREE_STORE(model);
-	const char *tvname, *url;
+	GtkTreeIter iter;
+	const char *tvname;
 	gint64 length;
+	GSList *urls;
 
 	parser = json_parser_new();
 
@@ -33,26 +33,26 @@ int parse(const char *filename)
 
 	//解析并添加影片信息
 	tvname = json_object_get_string_member(json_obj,"tvName");
-	url    = json_object_get_string_member(json_obj,"coverImg");
 	length = json_object_get_int_member(json_obj,"totalBytes");
 
-	gtk_tree_store_append(store, &piter, NULL);
-	gtk_tree_store_set(store, &piter, 1,tvname, 2,url, 3,length, -1);
-
 	//解析并添加影片片段信息
-	urls = json_object_get_array_member(json_obj,"clipsURL");
-	lengths = json_object_get_array_member(json_obj,"clipsBytes");
-	blocks = json_array_get_length(urls);
+	urlarray = json_object_get_array_member(json_obj,"clipsURL");
+	blocks = json_array_get_length(urlarray);
 
 	for (unsigned int i=0; i<blocks; i++) {
-		char name[100]={0};
-		sprintf(name, "%s_%03d.mp4", tvname, i);
-		url = json_array_get_string_element(urls,i);
-		length = json_array_get_int_element(lengths,i);
-
-		gtk_tree_store_append(store, &citer, &piter);
-		gtk_tree_store_set(store, &citer, 1,name, 2,url, 3,length, -1);
+		const char *url;
+		url = json_array_get_string_element(urlarray,i);
+		urls = g_slist_append(urls, strdup(url));
 	}
+
+	gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+			0, 1,		//selected
+			1, tvname,	//name
+			2, urls,	//url slist
+			3, length,	//size
+			4, 0,		//download process
+			-1);
 
 	g_object_unref(parser);
 	return 0;
