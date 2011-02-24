@@ -113,9 +113,10 @@ GSList * get_movie_list(const char *keyword)
 	char *url,*pos, *filename=NULL;
 	GSList *lst=NULL;
 
-	//FIXME:
-	//	将keyword编码成%xx%xx%xx的形式
-	url = g_strdup_printf("http://so.tv.sohu.com/mts?wd=%s", keyword);
+	//界面输入的是UTF8编码的字串，要转换成GBK编码，并进行URI转义
+	keyword = g_convert(keyword, -1, "gbk", "utf8", NULL, NULL, NULL);
+	url = g_strdup_printf("http://so.tv.sohu.com/mts?wd=%s",
+			g_uri_escape_string(keyword, NULL, 0));
 	filename = fetch(url, NULL, NULL);
 	if (!filename) {
 		return NULL;
@@ -133,5 +134,7 @@ GSList * get_movie_list(const char *keyword)
 	}
 	fclose(fp);
 	unlink(filename);
+	g_free((gpointer)keyword);
+	g_free(url);
 	return lst;
 }
