@@ -29,7 +29,7 @@
             <property name="visible">True</property>
             <property name="xalign">0</property>
             <property name="xpad">10</property>
-            <property name="label" translatable="yes">&#x8BF7;&#x8F93;&#x5165;&#x64AD;&#x653E;&#x9875;&#x9762;&#x5730;&#x5740;&#xFF1A;</property>
+            <property name="label" translatable="yes">&#x8BF7;&#x8F93;&#x5165;&#x786C;&#x76D8;&#x5173;&#x952E;&#x5B57;&#xFF1A;</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -61,11 +61,11 @@
             </child>
             <child>
               <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">&#x6DFB;&#x52A0;</property>
+                <property name="label" translatable="yes">&#x641C;&#x7D22;</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="btn_add_cb"/>
+                <signal name="clicked" handler="btn_search_cb"/>
               </object>
               <packing>
                 <property name="expand">False</property>
