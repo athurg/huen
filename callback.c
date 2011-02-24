@@ -108,6 +108,7 @@ gpointer do_download(gpointer update_cb)
 			if (tmpname) {
 				rename(tmpname,savename);
 			}
+			gtk_tree_store_set(GTK_TREE_STORE(model), &iter, 4,100, -1);
 		}
 	}while(gtk_tree_model_iter_next(model, &iter));
 }

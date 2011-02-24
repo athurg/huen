@@ -9,7 +9,7 @@
       <!-- column-name name -->
       <column type="gchararray"/>
       <!-- column-name url -->
-      <column type="gchararray"/>
+      <column type="gpointer"/>
       <!-- column-name size -->
       <column type="guint64"/>
       <!-- column-name progress -->
@@ -53,6 +53,7 @@
               <object class="GtkFileChooserButton" id="filechooserbutton">
                 <property name="visible">True</property>
                 <property name="action">select-folder</property>
+                <property name="use_preview_label">False</property>
                 <property name="title" translatable="yes">&#x9009;&#x62E9;&#x4FDD;&#x5B58;&#x8DEF;&#x5F84;</property>
               </object>
               <packing>
