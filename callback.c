@@ -104,12 +104,12 @@ gpointer do_download(gpointer update_cb)
 			 * FIXME
 			 * 	这里加入自定义路径，则rename总是返回-1，求真相
 			 */
-			savename = g_strdup_printf("/tmp/%s-%dof%d.mp4", name, i, blocks);
+			savename = g_strdup_printf("/tmp/%s-%dof%d.mp4", name, i+1, blocks);
 			if (tmpname) {
 				rename(tmpname,savename);
 			}
-			gtk_tree_store_set(GTK_TREE_STORE(model), &iter, 4,100, -1);
 		}
+		gtk_tree_store_set(GTK_TREE_STORE(model), &iter, 4,100, -1);
 	}while(gtk_tree_model_iter_next(model, &iter));
 }
 
